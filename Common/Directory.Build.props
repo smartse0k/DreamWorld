@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!-- Unity 에디터가 .NET 빌드 산출물 폴더(bin, obj)를 스캔하지 않도록 '~' 접미사 폴더로 출력 -->
+    <BaseOutputPath>bin~\</BaseOutputPath>
+    <BaseIntermediateOutputPath>obj~\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>
