@@ -1,0 +1,32 @@
+[
+  {
+    "skillId": 1,
+    "name": "기본 베기 (전방 1타일)",
+    "targetingType": "FrontTile",
+    "tileRange": 1,
+    "worldRange": 1.5,
+    "damage": 15,
+    "cooldownMs": 500,
+    "maxTargets": 1
+  },
+  {
+    "skillId": 2,
+    "name": "바람의 창 (전방 3타일 원거리 직선)",
+    "targetingType": "FrontTile",
+    "tileRange": 3,
+    "worldRange": 3.5,
+    "damage": 25,
+    "cooldownMs": 1200,
+    "maxTargets": 2
+  },
+  {
+    "skillId": 3,
+    "name": "드림 볼트 (단일 타게팅 마법)",
+    "targetingType": "SingleTarget",
+    "tileRange": 5,
+    "worldRange": 5.5,
+    "damage": 40,
+    "cooldownMs": 2000,
+    "maxTargets": 1
+  }
+]
