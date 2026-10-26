@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/Common/">
+    <Project Path="../Common/DreamWorld.Common.csproj" />
+  </Folder>
+  <Folder Name="/Core/">
+    <Project Path="Core/DreamWorld.Core.csproj" />
+  </Folder>
+  <Folder Name="/Lobby/">
+    <Project Path="Lobby/DreamWorld.Lobby.csproj" />
+  </Folder>
+  <Folder Name="/World/">
+    <Project Path="World/DreamWorld.World.csproj" />
+  </Folder>
+  <Folder Name="/DummyClient/">
+    <Project Path="DummyClient/DreamWorld.DummyClient.csproj" />
+  </Folder>
+</Solution>
