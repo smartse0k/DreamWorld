@@ -1,0 +1,24 @@
+[Bb]in/
+[Oo]bj/
+[Bb]in~/
+[Oo]bj~/
+[Ll]og/
+[Ll]ogs/
+TestResults/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+.vs/
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Unity 게임 프로젝트
+/DreamWorld/
+/Common/**/*.meta
