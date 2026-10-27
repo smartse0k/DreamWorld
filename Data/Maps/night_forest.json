@@ -34,9 +34,9 @@
     }
   ],
   "monsterSpawns": [
-    { "monsterTemplateId": 201, "name": "그림자 늑대", "maxHp": 90, "tileX": 6, "tileY": 8 },
-    { "monsterTemplateId": 201, "name": "그림자 늑대", "maxHp": 90, "tileX": 8, "tileY": 4 },
-    { "monsterTemplateId": 202, "name": "밤안개 정령", "maxHp": 150, "tileX": 11, "tileY": 8 },
-    { "monsterTemplateId": 203, "name": "달빛 골렘", "maxHp": 300, "tileX": 13, "tileY": 12 }
+    { "monsterKey": "shadow_wolf", "x": 6, "y": 8, "respawnMs": 5000 },
+    { "monsterKey": "shadow_wolf", "x": 8, "y": 4, "respawnMs": 5000 },
+    { "monsterKey": "night_mist_spirit", "x": 11, "y": 8, "respawnMs": 5000 },
+    { "monsterKey": "moonlight_golem", "x": 13, "y": 12, "respawnMs": 5000 }
   ]
 }

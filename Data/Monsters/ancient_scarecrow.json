@@ -1,0 +1,12 @@
+{
+  "name": "고대 허수아비",
+  "maxHp": 500,
+  "aiType": "Dummy",
+  "moveSpeed": 0.0,
+  "aggroRange": 0.0,
+  "attackRange": 0.0,
+  "leashRange": 0.0,
+  "wanderRadius": 0.0,
+  "attackDamage": 0,
+  "attackCooldownMs": 0
+}

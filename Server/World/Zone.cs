@@ -19,6 +19,7 @@ public class Zone
     private readonly Random _rng = new();
     private readonly GameMap _map;
     private readonly IReadOnlyDictionary<int, SkillData> _skills;
+    private readonly IReadOnlyDictionary<string, MonsterData> _monsterSpecs;
     private readonly Func<int> _entityIdGenerator;
     private readonly Action<Player, PortalConfig>? _onPortalTouched;
 
@@ -32,11 +33,13 @@ public class Zone
     public Zone(
         GameMap map,
         IReadOnlyDictionary<int, SkillData> skills,
+        IReadOnlyDictionary<string, MonsterData> monsterSpecs,
         Func<int> entityIdGenerator,
         Action<Player, PortalConfig>? onPortalTouched = null)
     {
         _map = map;
         _skills = skills;
+        _monsterSpecs = monsterSpecs;
         _entityIdGenerator = entityIdGenerator;
         _onPortalTouched = onPortalTouched;
         SpawnInitialMonsters();
@@ -47,26 +50,34 @@ public class Zone
         long now = Environment.TickCount64;
         foreach (var spawn in _map.MonsterSpawns)
         {
+            if (!_monsterSpecs.TryGetValue(spawn.MonsterKey, out MonsterData? spec) || spec == null)
+            {
+                spec = new MonsterData
+                {
+                    MonsterKey = spawn.MonsterKey,
+                    Name = spawn.MonsterKey
+                };
+            }
+
             int id = _entityIdGenerator();
-            var (wx, wy) = GridMath.TileToWorldCenter(spawn.TileX, spawn.TileY);
+            var (wx, wy) = GridMath.TileToWorldCenter(spawn.X, spawn.Y);
             var monster = new Monster
             {
                 EntityId = id,
-                TemplateId = spawn.MonsterTemplateId,
-                Name = spawn.Name,
+                MonsterKey = spec.MonsterKey,
+                Name = spec.Name,
                 PosX = wx,
                 PosY = wy,
                 SpawnX = wx,
                 SpawnY = wy,
                 LookDir = Direction.Down,
-                Hp = spawn.MaxHp,
-                MaxHp = spawn.MaxHp
+                RespawnMs = spawn.RespawnMs > 0 ? spawn.RespawnMs : 5000
             };
 
-            MonsterBehaviorTrees.ConfigureMonster(monster, now + _rng.Next(0, 1500));
+            MonsterBehaviorTrees.ConfigureMonster(monster, spec, now + _rng.Next(0, 1500));
             _monsters[id] = monster;
 
-            Console.WriteLine($"[Zone:Map{_map.MapId}] Monster Spawned: [{id}] {spawn.Name} at Tile({spawn.TileX}, {spawn.TileY}) HP={spawn.MaxHp}");
+            Console.WriteLine($"[Zone:Map{_map.MapId}] Monster Spawned: [{id}] {monster.MonsterKey} ('{monster.Name}') at Tile({spawn.X}, {spawn.Y}) HP={monster.MaxHp} Respawn={monster.RespawnMs}ms");
         }
     }
 
@@ -489,7 +500,7 @@ public class Zone
             bool died = monster.IsDead;
             if (died)
             {
-                monster.RespawnAtTick = now + 5000;
+                monster.RespawnAtTick = now + monster.RespawnMs;
                 monster.ResetAiState(0);
             }
             else if (monster.MoveSpeed > 0f)

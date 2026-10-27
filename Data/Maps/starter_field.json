@@ -34,9 +34,9 @@
     }
   ],
   "monsterSpawns": [
-    { "monsterTemplateId": 101, "name": "꿈결 슬라임", "maxHp": 50, "tileX": 4, "tileY": 4 },
-    { "monsterTemplateId": 101, "name": "꿈결 슬라임", "maxHp": 50, "tileX": 7, "tileY": 3 },
-    { "monsterTemplateId": 102, "name": "악몽 버섯", "maxHp": 120, "tileX": 9, "tileY": 7 },
-    { "monsterTemplateId": 103, "name": "고대 허수아비", "maxHp": 500, "tileX": 3, "tileY": 6 }
+    { "monsterKey": "dream_slime", "x": 4, "y": 4, "respawnMs": 5000 },
+    { "monsterKey": "dream_slime", "x": 7, "y": 3, "respawnMs": 5000 },
+    { "monsterKey": "nightmare_mushroom", "x": 9, "y": 7, "respawnMs": 5000 },
+    { "monsterKey": "ancient_scarecrow", "x": 3, "y": 6, "respawnMs": 5000 }
   ]
 }

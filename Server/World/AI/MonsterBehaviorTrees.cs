@@ -1,4 +1,5 @@
 using DreamWorld.Common;
+using DreamWorld.World.Data;
 using DreamWorld.World.Entity;
 
 namespace DreamWorld.World.AI;
@@ -24,53 +25,34 @@ public static class MonsterBehaviorTrees
     public static BtNode<MonsterAiContext> AggressiveMeleeTree { get; } = CreateAggressiveMeleeTree();
 
     /// <summary>
-    /// 몬스터 템플릿 ID에 맞춰 공유 Behavior Tree와 AI 파라미터를 설정합니다.
+    /// 몬스터 정적 데이터에 맞춰 공유 Behavior Tree와 AI 파라미터를 설정합니다.
     /// </summary>
-    public static void ConfigureMonster(Monster monster, long nowTick)
+    public static void ConfigureMonster(Monster monster, MonsterData spec, long nowTick)
     {
-        switch (monster.TemplateId)
+        monster.MaxHp = spec.MaxHp;
+        monster.Hp = spec.MaxHp;
+        monster.MoveSpeed = spec.MoveSpeed;
+        monster.AggroRange = spec.AggroRange;
+        monster.AttackRange = spec.AttackRange;
+        monster.LeashRange = spec.LeashRange;
+        monster.WanderRadius = spec.WanderRadius;
+        monster.AttackDamage = spec.AttackDamage;
+        monster.AttackCooldownMs = spec.AttackCooldownMs;
+
+        if (spec.AiType == "Dummy")
         {
-            // 고대 허수아비 (고정형 더미)
-            case 103:
-            {
-                monster.BehaviorTree = DummyTree;
-                monster.IsAggressive = false;
-                monster.MoveSpeed = 0f;
-                monster.WanderRadius = 0f;
-                monster.AttackDamage = 0;
-                break;
-            }
-
-            // 그림자 늑대, 달빛 골렘 (선공 몬스터)
-            case 201:
-            case 203:
-            {
-                monster.BehaviorTree = AggressiveMeleeTree;
-                monster.IsAggressive = true;
-                monster.MoveSpeed = 2.4f;
-                monster.AggroRange = 3.8f;
-                monster.AttackRange = 1.25f;
-                monster.LeashRange = 7.5f;
-                monster.WanderRadius = 2.5f;
-                monster.AttackDamage = 12;
-                monster.AttackCooldownMs = 1500;
-                break;
-            }
-
-            // 꿈결 슬라임, 악몽 버섯, 밤안개 정령 등 (비선공 몬스터)
-            default:
-            {
-                monster.BehaviorTree = PassiveMeleeTree;
-                monster.IsAggressive = false;
-                monster.MoveSpeed = 1.8f;
-                monster.AggroRange = 0f;
-                monster.AttackRange = 1.2f;
-                monster.LeashRange = 7.0f;
-                monster.WanderRadius = 2.0f;
-                monster.AttackDamage = 8;
-                monster.AttackCooldownMs = 1600;
-                break;
-            }
+            monster.BehaviorTree = DummyTree;
+            monster.IsAggressive = false;
+        }
+        else if (spec.AiType == "AggressiveMelee")
+        {
+            monster.BehaviorTree = AggressiveMeleeTree;
+            monster.IsAggressive = true;
+        }
+        else
+        {
+            monster.BehaviorTree = PassiveMeleeTree;
+            monster.IsAggressive = false;
         }
 
         monster.ResetAiState(nowTick + 3500);

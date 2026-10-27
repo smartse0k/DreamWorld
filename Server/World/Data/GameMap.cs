@@ -15,11 +15,10 @@ public class PortalConfig
 
 public class MonsterSpawnConfig
 {
-    public int MonsterTemplateId { get; set; }
-    public string Name { get; set; } = "Monster";
-    public int MaxHp { get; set; } = 50;
-    public int TileX { get; set; }
-    public int TileY { get; set; }
+    public string MonsterKey { get; set; } = string.Empty;
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int RespawnMs { get; set; } = 5000;
 }
 
 public class MapJsonConfig
@@ -181,8 +180,8 @@ public class GameMap
             Tiles = tiles,
             MonsterSpawns = new List<MonsterSpawnConfig>
             {
-                new() { MonsterTemplateId = 101, Name = "꿈결 슬라임", MaxHp = 50, TileX = 4, TileY = 4 },
-                new() { MonsterTemplateId = 103, Name = "고대 허수아비", MaxHp = 500, TileX = 3, TileY = 6 }
+                new() { MonsterKey = "dream_slime", X = 4, Y = 4 },
+                new() { MonsterKey = "ancient_scarecrow", X = 3, Y = 6 }
             }
         });
     }

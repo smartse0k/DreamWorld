@@ -24,6 +24,7 @@ public class WorldManager
             var zone = new Zone(
                 map,
                 dataManager.Skills,
+                dataManager.Monsters,
                 NextEntityId,
                 TransferPlayerViaPortal);
             _zones[map.MapId] = zone;

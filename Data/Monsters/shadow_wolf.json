@@ -1,0 +1,12 @@
+{
+  "name": "그림자 늑대",
+  "maxHp": 90,
+  "aiType": "AggressiveMelee",
+  "moveSpeed": 2.4,
+  "aggroRange": 3.8,
+  "attackRange": 1.25,
+  "leashRange": 7.5,
+  "wanderRadius": 2.5,
+  "attackDamage": 12,
+  "attackCooldownMs": 1500
+}

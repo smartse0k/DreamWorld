@@ -11,14 +11,17 @@ public class GameDataManager
 {
     private readonly Dictionary<int, GameMap> _maps = new();
     private readonly Dictionary<int, SkillData> _skills = new();
+    private readonly Dictionary<string, MonsterData> _monsters = new();
 
     public IReadOnlyDictionary<int, GameMap> Maps => _maps;
     public IReadOnlyDictionary<int, SkillData> Skills => _skills;
+    public IReadOnlyDictionary<string, MonsterData> Monsters => _monsters;
 
     public void LoadAll(string? baseDir = null)
     {
         string dataDir = FindDataDirectory(baseDir ?? AppContext.BaseDirectory);
         LoadSkills(Path.Combine(dataDir, "Skills", "skills.json"));
+        LoadMonsters(Path.Combine(dataDir, "Monsters"));
         LoadMaps(Path.Combine(dataDir, "Maps"));
     }
 
@@ -61,6 +64,39 @@ public class GameDataManager
         }
 
         Console.WriteLine($"[GameDataManager] Loaded {_skills.Count} skills.");
+    }
+
+    private void LoadMonsters(string monstersDir)
+    {
+        _monsters.Clear();
+
+        if (Directory.Exists(monstersDir))
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            foreach (string file in Directory.GetFiles(monstersDir, "*.json", SearchOption.AllDirectories).OrderBy(f => f))
+            {
+                string json = File.ReadAllText(file);
+                var monsterData = JsonSerializer.Deserialize<MonsterData>(json, options);
+                if (monsterData == null)
+                {
+                    continue;
+                }
+
+                string monsterKey = Path.GetFileNameWithoutExtension(file);
+                monsterData.MonsterKey = monsterKey;
+
+                _monsters[monsterKey] = monsterData;
+                Console.WriteLine(
+                    $"[GameDataManager] Loaded Monster '{monsterKey}' ('{monsterData.Name}', " +
+                    $"HP: {monsterData.MaxHp}, AI: {monsterData.AiType}, Dmg: {monsterData.AttackDamage})");
+            }
+        }
+
+        Console.WriteLine($"[GameDataManager] Loaded {_monsters.Count} monster templates.");
     }
 
     private void LoadMaps(string mapsDir)

@@ -1,0 +1,12 @@
+{
+  "name": "악몽 버섯",
+  "maxHp": 120,
+  "aiType": "PassiveMelee",
+  "moveSpeed": 1.6,
+  "aggroRange": 0.0,
+  "attackRange": 1.2,
+  "leashRange": 7.0,
+  "wanderRadius": 2.0,
+  "attackDamage": 10,
+  "attackCooldownMs": 1700
+}

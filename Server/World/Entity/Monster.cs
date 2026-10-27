@@ -7,9 +7,10 @@ namespace DreamWorld.World.Entity;
 /// </summary>
 public class Monster : Entity
 {
-    public int TemplateId { get; init; }
+    public string MonsterKey { get; init; } = string.Empty;
     public float SpawnX { get; init; }
     public float SpawnY { get; init; }
+    public int RespawnMs { get; set; } = 5000;
     public long RespawnAtTick { get; set; }
 
     /// <summary>
