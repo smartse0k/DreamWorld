@@ -1,0 +1,39 @@
+{
+  "type": "Selector",
+  "children": [
+    {
+      "type": "Sequence",
+      "children": [
+        { "type": "Condition", "name": "ShouldReturn" },
+        { "type": "Action", "name": "ReturnToSpawn" }
+      ]
+    },
+    {
+      "type": "Sequence",
+      "children": [
+        { "type": "Condition", "name": "HasNoTarget" },
+        { "type": "Action", "name": "FindAggroTarget" }
+      ]
+    },
+    {
+      "type": "Sequence",
+      "children": [
+        { "type": "Condition", "name": "HasValidTarget" },
+        {
+          "type": "Selector",
+          "children": [
+            {
+              "type": "Sequence",
+              "children": [
+                { "type": "Condition", "name": "IsTargetInAttackRange" },
+                { "type": "Action", "name": "AttackTarget" }
+              ]
+            },
+            { "type": "Action", "name": "ChaseTarget" }
+          ]
+        }
+      ]
+    },
+    { "type": "Action", "name": "Wander" }
+  ]
+}

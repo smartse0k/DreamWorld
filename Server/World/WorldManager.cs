@@ -25,6 +25,7 @@ public class WorldManager
                 map,
                 dataManager.Skills,
                 dataManager.Monsters,
+                dataManager.AiTrees,
                 NextEntityId,
                 TransferPlayerViaPortal);
             _zones[map.MapId] = zone;

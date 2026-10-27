@@ -1,6 +1,7 @@
 using System.Text.Json;
 using DreamWorld.Common;
 using DreamWorld.Common.Models;
+using DreamWorld.World.AI;
 
 namespace DreamWorld.World.Data;
 
@@ -11,16 +12,19 @@ public class GameDataManager
 {
     private readonly Dictionary<int, GameMap> _maps = new();
     private readonly Dictionary<int, SkillData> _skills = new();
+    private readonly Dictionary<string, BtNode<MonsterAiContext>> _aiTrees = new();
     private readonly Dictionary<string, MonsterData> _monsters = new();
 
     public IReadOnlyDictionary<int, GameMap> Maps => _maps;
     public IReadOnlyDictionary<int, SkillData> Skills => _skills;
+    public IReadOnlyDictionary<string, BtNode<MonsterAiContext>> AiTrees => _aiTrees;
     public IReadOnlyDictionary<string, MonsterData> Monsters => _monsters;
 
     public void LoadAll(string? baseDir = null)
     {
         string dataDir = FindDataDirectory(baseDir ?? AppContext.BaseDirectory);
         LoadSkills(Path.Combine(dataDir, "Skills", "skills.json"));
+        LoadAiTrees(Path.Combine(dataDir, "AI"));
         LoadMonsters(Path.Combine(dataDir, "Monsters"));
         LoadMaps(Path.Combine(dataDir, "Maps"));
     }
@@ -66,6 +70,35 @@ public class GameDataManager
         Console.WriteLine($"[GameDataManager] Loaded {_skills.Count} skills.");
     }
 
+    private void LoadAiTrees(string aiDir)
+    {
+        _aiTrees.Clear();
+
+        if (Directory.Exists(aiDir))
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            foreach (string file in Directory.GetFiles(aiDir, "*.json", SearchOption.AllDirectories).OrderBy(f => f))
+            {
+                string json = File.ReadAllText(file);
+                var config = JsonSerializer.Deserialize<BtNodeConfig>(json, options);
+                if (config == null)
+                {
+                    continue;
+                }
+
+                string aiKey = Path.GetFileNameWithoutExtension(file);
+                _aiTrees[aiKey] = MonsterBehaviorTrees.BuildFromConfig(config);
+                Console.WriteLine($"[GameDataManager] Loaded AI Tree '{aiKey}' (Root: {config.Type})");
+            }
+        }
+
+        Console.WriteLine($"[GameDataManager] Loaded {_aiTrees.Count} AI trees.");
+    }
+
     private void LoadMonsters(string monstersDir)
     {
         _monsters.Clear();
@@ -92,7 +125,7 @@ public class GameDataManager
                 _monsters[monsterKey] = monsterData;
                 Console.WriteLine(
                     $"[GameDataManager] Loaded Monster '{monsterKey}' ('{monsterData.Name}', " +
-                    $"HP: {monsterData.MaxHp}, AI: {monsterData.AiType}, Dmg: {monsterData.AttackDamage})");
+                    $"HP: {monsterData.MaxHp}, AI: {monsterData.AiKey}, Dmg: {monsterData.AttackDamage})");
             }
         }
 

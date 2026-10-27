@@ -20,6 +20,7 @@ public class Zone
     private readonly GameMap _map;
     private readonly IReadOnlyDictionary<int, SkillData> _skills;
     private readonly IReadOnlyDictionary<string, MonsterData> _monsterSpecs;
+    private readonly IReadOnlyDictionary<string, BtNode<MonsterAiContext>> _aiTrees;
     private readonly Func<int> _entityIdGenerator;
     private readonly Action<Player, PortalConfig>? _onPortalTouched;
 
@@ -34,12 +35,14 @@ public class Zone
         GameMap map,
         IReadOnlyDictionary<int, SkillData> skills,
         IReadOnlyDictionary<string, MonsterData> monsterSpecs,
+        IReadOnlyDictionary<string, BtNode<MonsterAiContext>> aiTrees,
         Func<int> entityIdGenerator,
         Action<Player, PortalConfig>? onPortalTouched = null)
     {
         _map = map;
         _skills = skills;
         _monsterSpecs = monsterSpecs;
+        _aiTrees = aiTrees;
         _entityIdGenerator = entityIdGenerator;
         _onPortalTouched = onPortalTouched;
         SpawnInitialMonsters();
@@ -59,6 +62,8 @@ public class Zone
                 };
             }
 
+            _aiTrees.TryGetValue(spec.AiKey, out BtNode<MonsterAiContext>? aiTree);
+
             int id = _entityIdGenerator();
             var (wx, wy) = GridMath.TileToWorldCenter(spawn.X, spawn.Y);
             var monster = new Monster
@@ -74,10 +79,10 @@ public class Zone
                 RespawnMs = spawn.RespawnMs > 0 ? spawn.RespawnMs : 5000
             };
 
-            MonsterBehaviorTrees.ConfigureMonster(monster, spec, now + _rng.Next(0, 1500));
+            MonsterBehaviorTrees.ConfigureMonster(monster, spec, aiTree, now + _rng.Next(0, 1500));
             _monsters[id] = monster;
 
-            Console.WriteLine($"[Zone:Map{_map.MapId}] Monster Spawned: [{id}] {monster.MonsterKey} ('{monster.Name}') at Tile({spawn.X}, {spawn.Y}) HP={monster.MaxHp} Respawn={monster.RespawnMs}ms");
+            Console.WriteLine($"[Zone:Map{_map.MapId}] Monster Spawned: [{id}] {monster.MonsterKey} ('{monster.Name}', AI:{spec.AiKey}) at Tile({spawn.X}, {spawn.Y}) HP={monster.MaxHp} Respawn={monster.RespawnMs}ms");
         }
     }
 

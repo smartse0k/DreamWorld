@@ -5,29 +5,71 @@ using DreamWorld.World.Entity;
 namespace DreamWorld.World.AI;
 
 /// <summary>
-/// 몬스터 종류별 공유 Behavior Tree 인스턴스와 AI 설정을 제공하는 클래스.
+/// JSON에서 역직렬화되는 Behavior Tree 노드 설정 데이터.
+/// </summary>
+public class BtNodeConfig
+{
+    public string Type { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public List<BtNodeConfig> Children { get; set; } = new();
+}
+
+/// <summary>
+/// JSON 설정으로부터 공유 Behavior Tree를 조립하고 몬스터 AI 동작을 제공하는 클래스.
 /// </summary>
 public static class MonsterBehaviorTrees
 {
     /// <summary>
-    /// 아무 행동도 하지 않는 허수아비용 Behavior Tree.
+    /// 기본 폴백용 더미 Behavior Tree.
     /// </summary>
-    public static BtNode<MonsterAiContext> DummyTree { get; } = CreateDummyTree();
+    public static BtNode<MonsterAiContext> DummyTree { get; } = new ActionNode<MonsterAiContext>(IdleAction);
 
     /// <summary>
-    /// 평상시 배회하다가 피격 시 추격 및 반격하는 비선공 몬스터용 Behavior Tree.
+    /// JSON 노드 설정 객체로부터 실행 가능한 Behavior Tree 노드를 재귀적으로 생성합니다.
     /// </summary>
-    public static BtNode<MonsterAiContext> PassiveMeleeTree { get; } = CreatePassiveMeleeTree();
+    public static BtNode<MonsterAiContext> BuildFromConfig(BtNodeConfig config)
+    {
+        if (config.Type == "Selector")
+        {
+            var children = new BtNode<MonsterAiContext>[config.Children.Count];
+            for (int i = 0; i < config.Children.Count; i++)
+            {
+                children[i] = BuildFromConfig(config.Children[i]);
+            }
+            return new SelectorNode<MonsterAiContext>(children);
+        }
+
+        if (config.Type == "Sequence")
+        {
+            var children = new BtNode<MonsterAiContext>[config.Children.Count];
+            for (int i = 0; i < config.Children.Count; i++)
+            {
+                children[i] = BuildFromConfig(config.Children[i]);
+            }
+            return new SequenceNode<MonsterAiContext>(children);
+        }
+
+        if (config.Type == "Condition")
+        {
+            return new ConditionNode<MonsterAiContext>(ResolveCondition(config.Name));
+        }
+
+        if (config.Type == "Action")
+        {
+            return new ActionNode<MonsterAiContext>(ResolveAction(config.Name));
+        }
+
+        throw new InvalidOperationException($"Unknown BtNode type: '{config.Type}'");
+    }
 
     /// <summary>
-    /// 인식 범위 내 플레이어를 먼저 감지하여 추격 및 공격하는 선공 몬스터용 Behavior Tree.
+    /// 몬스터 정적 데이터와 AI 트리를 몬스터 엔티티에 적용합니다.
     /// </summary>
-    public static BtNode<MonsterAiContext> AggressiveMeleeTree { get; } = CreateAggressiveMeleeTree();
-
-    /// <summary>
-    /// 몬스터 정적 데이터에 맞춰 공유 Behavior Tree와 AI 파라미터를 설정합니다.
-    /// </summary>
-    public static void ConfigureMonster(Monster monster, MonsterData spec, long nowTick)
+    public static void ConfigureMonster(
+        Monster monster,
+        MonsterData spec,
+        BtNode<MonsterAiContext>? aiTree,
+        long nowTick)
     {
         monster.MaxHp = spec.MaxHp;
         monster.Hp = spec.MaxHp;
@@ -38,74 +80,76 @@ public static class MonsterBehaviorTrees
         monster.WanderRadius = spec.WanderRadius;
         monster.AttackDamage = spec.AttackDamage;
         monster.AttackCooldownMs = spec.AttackCooldownMs;
-
-        if (spec.AiType == "Dummy")
-        {
-            monster.BehaviorTree = DummyTree;
-            monster.IsAggressive = false;
-        }
-        else if (spec.AiType == "AggressiveMelee")
-        {
-            monster.BehaviorTree = AggressiveMeleeTree;
-            monster.IsAggressive = true;
-        }
-        else
-        {
-            monster.BehaviorTree = PassiveMeleeTree;
-            monster.IsAggressive = false;
-        }
+        monster.BehaviorTree = aiTree ?? DummyTree;
 
         monster.ResetAiState(nowTick + 3500);
     }
 
-    private static BtNode<MonsterAiContext> CreateDummyTree()
+    private static Func<MonsterAiContext, bool> ResolveCondition(string name)
     {
-        return new ActionNode<MonsterAiContext>(IdleAction);
+        switch (name)
+        {
+            case "ShouldReturn":
+            {
+                return ShouldReturnCondition;
+            }
+            case "HasNoTarget":
+            {
+                return HasNoTargetCondition;
+            }
+            case "HasValidTarget":
+            {
+                return HasValidTargetCondition;
+            }
+            case "IsTargetInAttackRange":
+            {
+                return IsTargetInAttackRangeCondition;
+            }
+            default:
+            {
+                throw new InvalidOperationException($"Unknown BT Condition name: '{name}'");
+            }
+        }
     }
 
-    private static BtNode<MonsterAiContext> CreatePassiveMeleeTree()
+    private static Func<MonsterAiContext, BtStatus> ResolveAction(string name)
     {
-        return new SelectorNode<MonsterAiContext>(
-            CreateReturnBranch(),
-            CreateCombatBranch(),
-            new ActionNode<MonsterAiContext>(WanderAction)
-        );
+        switch (name)
+        {
+            case "Idle":
+            {
+                return IdleAction;
+            }
+            case "ReturnToSpawn":
+            {
+                return ReturnToSpawnAction;
+            }
+            case "FindAggroTarget":
+            {
+                return FindAggroTargetAction;
+            }
+            case "AttackTarget":
+            {
+                return AttackTargetAction;
+            }
+            case "ChaseTarget":
+            {
+                return ChaseTargetAction;
+            }
+            case "Wander":
+            {
+                return WanderAction;
+            }
+            default:
+            {
+                throw new InvalidOperationException($"Unknown BT Action name: '{name}'");
+            }
+        }
     }
 
-    private static BtNode<MonsterAiContext> CreateAggressiveMeleeTree()
-    {
-        return new SelectorNode<MonsterAiContext>(
-            CreateReturnBranch(),
-            new SequenceNode<MonsterAiContext>(
-                new ConditionNode<MonsterAiContext>(HasNoTargetCondition),
-                new ActionNode<MonsterAiContext>(FindAggroTargetAction)
-            ),
-            CreateCombatBranch(),
-            new ActionNode<MonsterAiContext>(WanderAction)
-        );
-    }
-
-    private static BtNode<MonsterAiContext> CreateReturnBranch()
-    {
-        return new SequenceNode<MonsterAiContext>(
-            new ConditionNode<MonsterAiContext>(ShouldReturnCondition),
-            new ActionNode<MonsterAiContext>(ReturnToSpawnAction)
-        );
-    }
-
-    private static BtNode<MonsterAiContext> CreateCombatBranch()
-    {
-        return new SequenceNode<MonsterAiContext>(
-            new ConditionNode<MonsterAiContext>(HasValidTargetCondition),
-            new SelectorNode<MonsterAiContext>(
-                new SequenceNode<MonsterAiContext>(
-                    new ConditionNode<MonsterAiContext>(IsTargetInAttackRangeCondition),
-                    new ActionNode<MonsterAiContext>(AttackTargetAction)
-                ),
-                new ActionNode<MonsterAiContext>(ChaseTargetAction)
-            )
-        );
-    }
+    // ========================================================================
+    // Condition & Action 노드 함수들 (무상태 공유)
+    // ========================================================================
 
     private static BtStatus IdleAction(MonsterAiContext ctx)
     {
@@ -173,7 +217,7 @@ public static class MonsterBehaviorTrees
     private static BtStatus FindAggroTargetAction(MonsterAiContext ctx)
     {
         Monster self = ctx.Self;
-        if (!self.IsAggressive || self.AggroRange <= 0f)
+        if (self.AggroRange <= 0f)
         {
             return BtStatus.Failure;
         }

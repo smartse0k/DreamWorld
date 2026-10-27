@@ -1,7 +1,7 @@
 {
   "name": "고대 허수아비",
   "maxHp": 500,
-  "aiType": "Dummy",
+  "aiKey": "dummy",
   "moveSpeed": 0.0,
   "aggroRange": 0.0,
   "attackRange": 0.0,

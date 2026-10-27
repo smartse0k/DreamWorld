@@ -8,7 +8,7 @@ public class MonsterData
     public string MonsterKey { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public int MaxHp { get; set; } = 50;
-    public string AiType { get; set; } = "PassiveMelee";
+    public string AiKey { get; set; } = "passive_monster";
     public float MoveSpeed { get; set; } = 1.8f;
     public float AggroRange { get; set; } = 0.0f;
     public float AttackRange { get; set; } = 1.2f;

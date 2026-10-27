@@ -18,7 +18,6 @@ public class Monster : Entity
     /// </summary>
     public BtNode<MonsterAiContext>? BehaviorTree { get; set; }
 
-    public bool IsAggressive { get; set; }
     public float MoveSpeed { get; set; } = 2.0f;
     public float AggroRange { get; set; } = 4.0f;
     public float AttackRange { get; set; } = 1.2f;

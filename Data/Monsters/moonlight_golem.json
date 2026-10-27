@@ -1,7 +1,7 @@
 {
   "name": "달빛 골렘",
   "maxHp": 300,
-  "aiType": "AggressiveMelee",
+  "aiKey": "aggressive_monster",
   "moveSpeed": 1.8,
   "aggroRange": 3.5,
   "attackRange": 1.4,
