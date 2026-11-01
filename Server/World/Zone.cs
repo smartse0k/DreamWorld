@@ -437,6 +437,9 @@ public class Zone
         attacker.SkillCooldownUntil[skill.SkillId] = now + skill.CooldownMs;
 
         var hitTargets = new List<Monster>();
+        bool isBlockedByWall = false;
+        int blockedTileX = 0;
+        int blockedTileY = 0;
 
         if (skill.TargetingType == AttackTargetingType.FrontTile)
         {
@@ -445,7 +448,10 @@ public class Zone
                 attacker.PosY,
                 lookDir,
                 skill.TileRange,
-                _map.IsTileWall);
+                _map.IsTileWall,
+                out isBlockedByWall,
+                out blockedTileX,
+                out blockedTileY);
 
             var candidates = new List<(Monster monster, float dist)>();
             foreach (var monster in _monsters.Values)
@@ -534,7 +540,13 @@ public class Zone
                 $"on [{monster.Name}#{monster.EntityId}] | Dmg:{skill.Damage}, HP:{monster.Hp}/{monster.MaxHp} {(died ? "(DEAD)" : "")}");
         }
 
-        if (hitResults.Count == 0)
+        if (isBlockedByWall)
+        {
+            Console.WriteLine(
+                $"[Zone:Map{_map.MapId}] Combat -> [{attacker.Name}] '{skill.Name}' (Dir:{lookDir}) " +
+                $"collided with Wall at Tile({blockedTileX}, {blockedTileY})");
+        }
+        else if (hitResults.Count == 0)
         {
             var (tx, ty) = attacker.CurrentTile;
             var (dx, dy) = GridMath.GetDirectionOffset(lookDir);
@@ -548,6 +560,10 @@ public class Zone
             AttackerId = attacker.EntityId,
             SkillId = skill.SkillId,
             LookDir = lookDir,
+            TileRange = skill.TileRange,
+            IsBlockedByWall = isBlockedByWall,
+            BlockedTileX = blockedTileX,
+            BlockedTileY = blockedTileY,
             Hits = hitResults
         }));
     }

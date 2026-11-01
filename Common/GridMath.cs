@@ -112,9 +112,37 @@ namespace DreamWorld.Common
             int tileRange,
             Func<int, int, bool>? isWallTile = null)
         {
+            return GetFrontTargetTiles(
+                attackerX,
+                attackerY,
+                dir,
+                tileRange,
+                isWallTile,
+                out _,
+                out _,
+                out _);
+        }
+
+        /// <summary>
+        /// 시전자의 전방 타격 대상 타일 목록과 벽 충돌 여부를 계산합니다.
+        /// </summary>
+        public static List<(int tileX, int tileY)> GetFrontTargetTiles(
+            float attackerX,
+            float attackerY,
+            Direction dir,
+            int tileRange,
+            Func<int, int, bool>? isWallTile,
+            out bool isBlockedByWall,
+            out int blockedTileX,
+            out int blockedTileY)
+        {
             var result = new List<(int tileX, int tileY)>(tileRange);
             var (originTx, originTy) = WorldToTile(attackerX, attackerY);
             var (dx, dy) = GetDirectionOffset(dir);
+
+            isBlockedByWall = false;
+            blockedTileX = 0;
+            blockedTileY = 0;
 
             for (int step = 1; step <= tileRange; step++)
             {
@@ -123,7 +151,9 @@ namespace DreamWorld.Common
 
                 if (isWallTile != null && isWallTile(targetTx, targetTy))
                 {
-                    // 벽에 막히면 관통 중단
+                    isBlockedByWall = true;
+                    blockedTileX = targetTx;
+                    blockedTileY = targetTy;
                     break;
                 }
 
